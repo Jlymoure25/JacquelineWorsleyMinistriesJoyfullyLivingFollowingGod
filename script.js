@@ -1,6 +1,6 @@
-// Simplified Jacqueline Worsley Ministries Script - Audio handled in HTML
+// Minimal script - Audio is handled automatically in HTML
 
-class SimpleWebsite {
+class BiblicalJourney {
     constructor() {
         this.currentSection = 0;
         this.sections = document.querySelectorAll('.section');
@@ -9,7 +9,7 @@ class SimpleWebsite {
     }
 
     init() {
-        console.log('📖 Initializing Biblical Journey...');
+        console.log('📖 Biblical Journey initialized - Audio auto-starting in HTML');
         this.showSection(0);
         this.setupNavigation();
         this.setupAutoAdvance();
@@ -151,8 +151,8 @@ class SimpleWebsite {
     }
 }
 
-// Initialize when page loads
+// Initialize when page loads - Audio handled automatically in HTML
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🎬 Starting Jacqueline Worsley Ministries Experience...');
-    new SimpleWebsite();
+    console.log('📖 Initializing Biblical Journey sections...');
+    new BiblicalJourney();
 });
