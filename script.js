@@ -33,31 +33,56 @@ class CinematicWebsite {
     }
 
     setupAudio() {
+        console.log('🎵 Setting up audio systems...');
         this.initializeSpeechSynthesis();
-        this.initializeSoundCloudIntegration();
+        
+        // Delay SoundCloud initialization to ensure DOM is ready
+        setTimeout(() => {
+            this.initializeSoundCloudIntegration();
+        }, 1000);
     }
 
     initializeSpeechSynthesis() {
         if ('speechSynthesis' in window) {
             console.log('🎤 Initializing speech synthesis for live site...');
             
-            const voices = speechSynthesis.getVoices();
-            console.log('Available voices:', voices.length);
+            // Force speech synthesis to wake up
+            speechSynthesis.cancel();
             
-            if (voices.length === 0) {
-                speechSynthesis.addEventListener('voiceschanged', () => {
-                    const newVoices = speechSynthesis.getVoices();
-                    console.log('Speech synthesis voices loaded:', newVoices.length);
+            const initVoices = () => {
+                const voices = speechSynthesis.getVoices();
+                console.log('📢 Available voices:', voices.length);
+                
+                if (voices.length > 0) {
                     this.voicesLoaded = true;
-                });
-            } else {
-                this.voicesLoaded = true;
-                console.log('Voices already available');
-            }
+                    console.log('✅ Speech synthesis voices ready');
+                    
+                    // Test with a silent utterance to prime the system
+                    this.testSpeechSynthesis();
+                } else {
+                    console.log('⏳ Waiting for voices to load...');
+                }
+            };
             
-            this.testSpeechSynthesis();
+            // Try to get voices immediately
+            initVoices();
+            
+            // Set up event listener for voice loading
+            speechSynthesis.addEventListener('voiceschanged', () => {
+                console.log('🔄 Speech synthesis voices changed event');
+                initVoices();
+            });
+            
+            // Force trigger voices changed event
+            setTimeout(() => {
+                if (!this.voicesLoaded) {
+                    console.log('🔄 Manually triggering voice initialization...');
+                    speechSynthesis.getVoices();
+                }
+            }, 1000);
+            
         } else {
-            console.error('Speech synthesis not supported in this browser');
+            console.error('❌ Speech synthesis not supported in this browser');
         }
     }
 
@@ -97,23 +122,28 @@ class CinematicWebsite {
     }
 
     initializeSoundCloudIntegration() {
+        console.log('🔊 Initializing SoundCloud integration...');
         this.soundcloudPlayer = document.getElementById('soundcloud-player');
+        
         if (this.soundcloudPlayer) {
-            console.log('SoundCloud player reference established');
+            console.log('✓ SoundCloud player element found');
             
-            if (typeof SC !== 'undefined' && SC.Widget) {
-                this.scWidget = SC.Widget(this.soundcloudPlayer);
-                
-                this.scWidget.bind(SC.Widget.Events.READY, () => {
-                    console.log('SoundCloud Widget API ready - full API controls');
-                    this.scWidget.setVolume(50);
-                    this.scWidget.seekTo(0);
-                    this.scWidget.play();
-                    this.scWidget.getDuration((duration) => {
-                        console.log('Audio duration:', duration, 'ms');
+            // Wait for SoundCloud Widget API to be available
+            const initializeWidget = () => {
+                if (typeof SC !== 'undefined' && SC.Widget) {
+                    console.log('✓ SoundCloud Widget API available');
+                    this.scWidget = SC.Widget(this.soundcloudPlayer);
+                    
+                    this.scWidget.bind(SC.Widget.Events.READY, () => {
+                        console.log('✅ SoundCloud Widget API ready - initializing audio');
+                        this.scWidget.setVolume(50);
+                        this.scWidget.seekTo(0);
+                        this.scWidget.play();
+                        this.scWidget.getDuration((duration) => {
+                            console.log('🎵 Audio duration:', duration, 'ms');
+                        });
+                        this.audioReady = true;
                     });
-                    this.audioReady = true;
-                });
                 
                 this.scWidget.bind(SC.Widget.Events.PLAY, () => {
                     console.log('Audio playing via Widget API - maintaining optimal volume');
@@ -130,12 +160,26 @@ class CinematicWebsite {
                     console.log('Audio finished - maintaining volume setting');
                 });
                 
-                this.scWidget.bind(SC.Widget.Events.ERROR, () => {
-                    console.log('SoundCloud Widget API error - attempting recovery');
-                });
-            }
+                    this.scWidget.bind(SC.Widget.Events.ERROR, (error) => {
+                        console.error('❌ SoundCloud Widget API error:', error);
+                        console.log('🔄 Attempting to reinitialize SoundCloud...');
+                        setTimeout(() => {
+                            this.initializeSoundCloudIntegration();
+                        }, 2000);
+                    });
+                } else {
+                    console.warn('⚠ SoundCloud Widget API not available, retrying...');
+                    setTimeout(initializeWidget, 1000);
+                }
+            };
             
+            initializeWidget();
             this.applyVolumeReduction();
+        } else {
+            console.error('❌ SoundCloud player element not found');
+            setTimeout(() => {
+                this.initializeSoundCloudIntegration();
+            }, 2000);
         }
     }
 
@@ -338,9 +382,12 @@ class CinematicWebsite {
     }
 
     startAudioPlayback() {
+        console.log('🎬 Starting cinematic experience...');
+        // Longer delay to ensure all systems are initialized
         setTimeout(() => {
+            console.log('🎤 Starting welcome narration...');
             this.displayWelcomeMessage();
-        }, 1500);
+        }, 3000); // Increased from 1.5 to 3 seconds
     }
 
     startAmbientAudio() {
@@ -470,11 +517,13 @@ class CinematicWebsite {
     }
 
     setupAutoAdvance() {
+        // Slower auto-advance to allow for proper reading and narration
         this.autoProgressTimer = setInterval(() => {
             if (!this.isNarrating && this.currentSection < this.totalSections - 1) {
+                console.log('⏭ Auto-advancing to next section...');
                 this.nextSection();
             }
-        }, 12000);
+        }, 20000); // Increased from 12 seconds to 20 seconds
     }
 
     showSection(index) {
@@ -536,8 +585,11 @@ class CinematicWebsite {
         
         document.body.appendChild(messageDisplay);
         
+        // Ensure speech synthesis is ready and user interaction is enabled
         this.initializeSpeechSynthesis();
         this.addUserInteractionTrigger();
+        
+        console.log('🎭 Welcome message display prepared, waiting for audio initialization...');
         
         const showMessage = () => {
             if (messageIndex < messages.length && this.currentSection === 0) {
@@ -554,32 +606,35 @@ class CinematicWebsite {
                             messageDisplay.remove();
                             this.sectionNarrated.add('0-intro');
                         }
-                    }, 1500);
+                    }, 3000); // Increased delay between messages
                 };
                 
                 this.speakText(messages[messageIndex], onMessageComplete);
             }
         };
         
-        setTimeout(showMessage, 3000);
+        // Longer delay to ensure both audio and speech synthesis are ready
+        setTimeout(showMessage, 5000);
     }
     
     speakText(text, onComplete = null) {
-        console.log('🎤 Attempting to start narrator voice on live site...');
+        console.log('🎤 Starting narrator voice:', text.substring(0, 50) + '...');
         
         if ('speechSynthesis' in window) {
-            console.log('✓ Speech synthesis available, initializing...');
+            console.log('✓ Speech synthesis available');
             
+            // Cancel any existing speech
             speechSynthesis.cancel();
             
             const startSpeech = () => {
                 try {
+                    // Force get voices again
                     const voices = speechSynthesis.getVoices();
-                    console.log('🔊 Available voices for narrator:', voices.length);
+                    console.log('🔊 Voices available for narration:', voices.length);
                     
                     if (voices.length === 0) {
-                        console.warn('⚠ No voices loaded yet, retrying...');
-                        setTimeout(startSpeech, 500);
+                        console.warn('⚠ No voices available, waiting...');
+                        setTimeout(startSpeech, 1000);
                         return;
                     }
                     
@@ -619,7 +674,7 @@ class CinematicWebsite {
                         this.currentUtterance = null;
                         console.log('✅ Narrator voice completed:', text.substring(0, 50) + '...');
                         if (onComplete) {
-                            setTimeout(onComplete, 2000);
+                            setTimeout(onComplete, 3000); // Longer pause after narration
                         }
                     };
                     
