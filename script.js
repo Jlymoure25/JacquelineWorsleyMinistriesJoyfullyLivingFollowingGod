@@ -15,6 +15,8 @@ class CinematicWebsite {
         this.isPaused = true; // Start paused for intro music
         this.soundcloudPlayer = null;
         this.fadeInterval = null;
+        this.audioReady = false;
+        this.scWidget = null;
         this.init();
     }
 
@@ -69,10 +71,12 @@ class CinematicWebsite {
                     console.log('SoundCloud Widget API ready - enforcing 17% volume with full API controls');
                     this.scWidget.setVolume(17); // Widget API: 17% volume control
                     this.scWidget.seekTo(0); // Widget API: seekTo(0) command
-                    this.scWidget.play(); // Widget API: play() command
+                    // Don't auto-play immediately - wait for user interaction
                     this.scWidget.getDuration((duration) => {
                         console.log('Audio duration:', duration, 'ms');
                     });
+                    // Store widget for later use
+                    this.audioReady = true;
                 });
                 
                 // Volume control on play events
@@ -308,16 +312,18 @@ class CinematicWebsite {
     }
     
     startBackgroundMusic() {
-        // SoundCloud player with 2-minute fade-in effect
-        console.log('Starting background music with 2-minute fade-in');
-        if (this.soundcloudPlayer) {
+        // SoundCloud player with user interaction support
+        console.log('Starting background music with user interaction');
+        if (this.soundcloudPlayer && this.scWidget && this.audioReady) {
+            this.scWidget.play();
+            this.scWidget.setVolume(17);
             this.fadeInAudio();
-            console.log('SoundCloud "We Belong Together (Instrumental)" starting 2-minute fade-in');
+            console.log('SoundCloud "We Belong Together (Instrumental)" starting with user interaction');
             this.isAudioPlaying = true;
             const audioBtn = document.querySelector('.audio-btn');
             if (audioBtn) audioBtn.textContent = '🔊';
         } else {
-            console.log('SoundCloud player not found, using fallback');
+            console.log('SoundCloud player not ready, will retry when ready');
             if (this.ambientAudio) {
                 this.ambientAudio.play();
             }
@@ -1133,6 +1139,15 @@ class CinematicWebsite {
 function enableAudio() {
     if (window.cinematicWebsite) {
         window.cinematicWebsite.startBackgroundMusic();
+    }
+}
+
+function startAudioPlayback() {
+    if (window.cinematicWebsite && window.cinematicWebsite.scWidget) {
+        console.log('Starting audio playback via user interaction');
+        window.cinematicWebsite.scWidget.play();
+        window.cinematicWebsite.scWidget.setVolume(17);
+        window.cinematicWebsite.isAudioPlaying = true;
     }
 }
 
