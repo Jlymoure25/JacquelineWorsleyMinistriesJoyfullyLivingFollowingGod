@@ -5,166 +5,161 @@ class CinematicWebsite {
         this.currentSection = 0;
         this.totalSections = 0;
         this.sections = [];
-        this.audio = null;
-        this.isAudioPlaying = false;
-        this.autoProgressTimer = null;
         this.isNarrating = false;
         this.currentUtterance = null;
         this.sectionNarrated = new Set();
-        this.introMusicPlayed = false;
-        this.isPaused = false;
-        this.soundcloudPlayer = null;
-        this.fadeInterval = null;
-        this.audioReady = false;
         this.scWidget = null;
-        this.voicesLoaded = false;
-        this.speechTriggered = false;
+        this.audioReady = false;
+        this.speechReady = false;
+        this.userHasInteracted = false;
+        
+        console.log('🎬 Jacqueline Worsley Ministries - Starting Experience...');
         this.init();
     }
 
     init() {
-        console.log('🎬 Initializing Jacqueline Worsley Ministries Experience...');
-        
         this.sections = document.querySelectorAll('.section');
         this.totalSections = this.sections.length;
         
-        // Add immediate user interaction triggers
-        this.addUserInteractionTrigger();
-        
-        // Setup all systems
-        this.setupAudio();
+        // Setup everything immediately
+        this.setupUserInteraction();
+        this.setupSoundCloudAudio();
+        this.setupSpeechSynthesis();
         this.showSection(0);
         this.setupNavigation();
         this.setupAutoAdvance();
         
-        // Start the experience
-        this.startAudioPlayback();
+        // Start immediately
+        this.startExperience();
     }
 
-    setupAudio() {
-        console.log('🎵 Setting up audio systems...');
-        this.initializeSpeechSynthesis();
+    setupUserInteraction() {
+        // Create and show start button immediately
+        this.createStartButton();
         
-        // Delay SoundCloud initialization to ensure DOM is ready
-        setTimeout(() => {
-            this.initializeSoundCloudIntegration();
-        }, 1000);
-    }
-
-    initializeSpeechSynthesis() {
-        if ('speechSynthesis' in window) {
-            console.log('🎤 Initializing speech synthesis for live site...');
-            
-            // Force speech synthesis to wake up
-            speechSynthesis.cancel();
-            
-            const initVoices = () => {
-                const voices = speechSynthesis.getVoices();
-                console.log('📢 Available voices:', voices.length);
-                
-                if (voices.length > 0) {
-                    this.voicesLoaded = true;
-                    console.log('✅ Speech synthesis voices ready');
-                    
-                    // Test with a silent utterance to prime the system
-                    this.testSpeechSynthesis();
-                } else {
-                    console.log('⏳ Waiting for voices to load...');
-                }
-            };
-            
-            // Try to get voices immediately
-            initVoices();
-            
-            // Set up event listener for voice loading
-            speechSynthesis.addEventListener('voiceschanged', () => {
-                console.log('🔄 Speech synthesis voices changed event');
-                initVoices();
-            });
-            
-            // Force trigger voices changed event
-            setTimeout(() => {
-                if (!this.voicesLoaded) {
-                    console.log('🔄 Manually triggering voice initialization...');
-                    speechSynthesis.getVoices();
-                }
-            }, 1000);
-            
-        } else {
-            console.error('❌ Speech synthesis not supported in this browser');
-        }
-    }
-
-    testSpeechSynthesis() {
-        try {
-            const testUtterance = new SpeechSynthesisUtterance('');
-            testUtterance.volume = 0.01;
-            testUtterance.rate = 10;
-            speechSynthesis.speak(testUtterance);
-            console.log('Speech synthesis test completed');
-        } catch (error) {
-            console.error('Speech synthesis test failed:', error);
-        }
-    }
-    
-    addUserInteractionTrigger() {
-        const triggerSpeech = () => {
-            if (!this.speechTriggered) {
-                console.log('🔓 Triggering speech synthesis via user interaction...');
-                try {
-                    const silentUtterance = new SpeechSynthesisUtterance('');
-                    silentUtterance.volume = 0.01;
-                    speechSynthesis.speak(silentUtterance);
-                    this.speechTriggered = true;
-                    console.log('✓ Speech synthesis unlocked');
-                } catch (error) {
-                    console.error('Speech trigger failed:', error);
-                }
+        // Listen for any user interaction
+        const activateAudio = () => {
+            if (!this.userHasInteracted) {
+                this.userHasInteracted = true;
+                console.log('✅ User interaction detected - activating audio systems');
+                this.activateAllAudio();
             }
         };
         
-        ['click', 'touchstart', 'keydown', 'scroll'].forEach(event => {
-            document.addEventListener(event, triggerSpeech, { once: true });
+        ['click', 'touchstart', 'keydown'].forEach(event => {
+            document.addEventListener(event, activateAudio, { once: true });
         });
-        
-        setTimeout(triggerSpeech, 1000);
     }
 
-    initializeSoundCloudIntegration() {
-        console.log('🔊 Starting SoundCloud integration...');
+    setupSpeechSynthesis() {
+        if ('speechSynthesis' in window) {
+            console.log('🎤 Speech synthesis available');
+            this.speechReady = true;
+            
+            // Wake up speech synthesis
+            speechSynthesis.cancel();
+            speechSynthesis.getVoices();
+        } else {
+            console.error('❌ Speech synthesis not supported');
+        }
+    }
+
+    createStartButton() {
+        const button = document.createElement('button');
+        button.innerHTML = '🎬 Begin Sacred Journey';
+        button.className = 'start-experience-btn';
+        button.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 40px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #d4af37, #dc143c);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            z-index: 10000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            font-family: 'Playfair Display', serif;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            transition: transform 0.3s ease;
+        `;
         
+        button.addEventListener('mouseenter', () => {
+            button.style.transform = 'translate(-50%, -50%) scale(1.05)';
+        });
+        
+        button.addEventListener('mouseleave', () => {
+            button.style.transform = 'translate(-50%, -50%) scale(1)';
+        });
+        
+        button.onclick = () => {
+            console.log('🎬 User clicked start button');
+            this.userHasInteracted = true;
+            button.remove();
+            this.activateAllAudio();
+            setTimeout(() => {
+                this.startNarration();
+            }, 1000);
+        };
+        
+        document.body.appendChild(button);
+        this.startButton = button;
+    }
+    
+    activateAllAudio() {
+        console.log('🎵 Activating all audio systems...');
+        
+        // Start SoundCloud
+        if (this.scWidget && this.audioReady) {
+            this.scWidget.play();
+            this.scWidget.setVolume(50);
+            console.log('✅ SoundCloud audio started');
+        } else {
+            console.warn('⚠️ SoundCloud not ready');
+        }
+        
+        // Prime speech synthesis
+        if (this.speechReady) {
+            try {
+                const testUtterance = new SpeechSynthesisUtterance('');
+                testUtterance.volume = 0.01;
+                speechSynthesis.speak(testUtterance);
+                console.log('✅ Speech synthesis activated');
+            } catch (error) {
+                console.error('❌ Speech activation failed:', error);
+            }
+        }
+    }
+
+    setupSoundCloudAudio() {
         const player = document.getElementById('soundcloud-player');
         if (!player) {
-            console.error('❌ SoundCloud player element not found!');
+            console.error('❌ No SoundCloud player found');
             return;
         }
         
-        console.log('✓ SoundCloud player found, checking API...');
+        if (typeof SC === 'undefined') {
+            console.error('❌ SoundCloud API not loaded');
+            return;
+        }
         
-        // Check for SoundCloud API with timeout
-        let attempts = 0;
-        const maxAttempts = 10;
-        
-        const initWidget = () => {
-            attempts++;
+        try {
+            this.scWidget = SC.Widget(player);
+            console.log('✅ SoundCloud widget created');
             
-            if (typeof SC !== 'undefined' && SC.Widget) {
-                console.log('✅ SoundCloud API available, creating widget...');
-                
-                try {
-                    this.scWidget = SC.Widget(player);
-                    this.soundcloudPlayer = player;
-                    
-                    this.scWidget.bind(SC.Widget.Events.READY, () => {
-                        console.log('🎵 SoundCloud widget ready - starting audio...');
-                        
-                        // Set volume and play
-                        this.scWidget.setVolume(50);
-                        this.scWidget.play();
-                        this.audioReady = true;
-                        
-                        console.log('✅ SoundCloud audio initialized successfully');
-                    });
+            this.scWidget.bind(SC.Widget.Events.READY, () => {
+                console.log('🎵 SoundCloud ready - will start on user interaction');
+                this.audioReady = true;
+            });
+            
+        } catch (error) {
+            console.error('❌ SoundCloud widget error:', error);
+        }
+    }
                 
                 this.scWidget.bind(SC.Widget.Events.PLAY, () => {
                     console.log('Audio playing via Widget API - maintaining optimal volume');
@@ -405,13 +400,30 @@ class CinematicWebsite {
         }, 500);
     }
 
-    startAudioPlayback() {
-        console.log('🎬 Starting cinematic experience...');
-        // Longer delay to ensure all systems are initialized
+    startExperience() {
+        console.log('🎭 Experience ready - waiting for user interaction...');
+        
+        // Auto-hide start button and begin after 5 seconds if no interaction
         setTimeout(() => {
-            console.log('🎤 Starting welcome narration...');
-            this.displayWelcomeMessage();
-        }, 3000); // Increased from 1.5 to 3 seconds
+            if (this.startButton && this.startButton.parentNode) {
+                console.log('⏰ Auto-starting experience...');
+                this.startButton.click();
+            }
+        }, 5000);
+    }
+    
+    startNarration() {
+        console.log('🎤 Starting welcome narration...');
+        this.displayWelcomeMessage();
+    }
+
+    setupAutoAdvance() {
+        // Auto-advance between sections
+        setInterval(() => {
+            if (!this.isNarrating && this.currentSection < this.totalSections - 1) {
+                this.nextSection();
+            }
+        }, 18000); // 18 seconds per section
     }
 
     startAmbientAudio() {
@@ -609,11 +621,7 @@ class CinematicWebsite {
         
         document.body.appendChild(messageDisplay);
         
-        // Ensure speech synthesis is ready and user interaction is enabled
-        this.initializeSpeechSynthesis();
-        this.addUserInteractionTrigger();
-        
-        console.log('🎭 Welcome message display prepared, waiting for audio initialization...');
+        console.log('🎭 Starting welcome messages...');
         
         const showMessage = () => {
             if (messageIndex < messages.length && this.currentSection === 0) {
@@ -637,49 +645,8 @@ class CinematicWebsite {
             }
         };
         
-        // Add manual start button for user interaction
-        const startButton = document.createElement('button');
-        startButton.textContent = '🎤 Start Experience';
-        startButton.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 20px 40px;
-            font-size: 1.5rem;
-            background: linear-gradient(45deg, var(--gold), var(--crimson));
-            color: white;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            z-index: 10000;
-            font-weight: bold;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        `;
-        
-        startButton.onclick = () => {
-            console.log('🎬 Manual start triggered by user');
-            startButton.remove();
-            
-            // Initialize audio
-            if (this.scWidget) {
-                this.scWidget.play();
-                this.scWidget.setVolume(50);
-            }
-            
-            // Start narration
-            setTimeout(showMessage, 1000);
-        };
-        
-        document.body.appendChild(startButton);
-        
-        // Auto-start after delay, remove button if successful
-        setTimeout(() => {
-            if (startButton.parentNode) {
-                console.log('🎬 Auto-starting experience...');
-                startButton.click();
-            }
-        }, 3000);
+        // Start messages after a delay
+        setTimeout(showMessage, 2000);
     }
     
     speakText(text, onComplete = null) {
