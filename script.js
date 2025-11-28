@@ -23,12 +23,21 @@ class CinematicWebsite {
     }
 
     init() {
+        console.log('🎬 Initializing Jacqueline Worsley Ministries Experience...');
+        
         this.sections = document.querySelectorAll('.section');
         this.totalSections = this.sections.length;
+        
+        // Add immediate user interaction triggers
+        this.addUserInteractionTrigger();
+        
+        // Setup all systems
         this.setupAudio();
         this.showSection(0);
         this.setupNavigation();
         this.setupAutoAdvance();
+        
+        // Start the experience
         this.startAudioPlayback();
     }
 
@@ -122,27 +131,39 @@ class CinematicWebsite {
     }
 
     initializeSoundCloudIntegration() {
-        console.log('🔊 Initializing SoundCloud integration...');
-        this.soundcloudPlayer = document.getElementById('soundcloud-player');
+        console.log('🔊 Starting SoundCloud integration...');
         
-        if (this.soundcloudPlayer) {
-            console.log('✓ SoundCloud player element found');
+        const player = document.getElementById('soundcloud-player');
+        if (!player) {
+            console.error('❌ SoundCloud player element not found!');
+            return;
+        }
+        
+        console.log('✓ SoundCloud player found, checking API...');
+        
+        // Check for SoundCloud API with timeout
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        const initWidget = () => {
+            attempts++;
             
-            // Wait for SoundCloud Widget API to be available
-            const initializeWidget = () => {
-                if (typeof SC !== 'undefined' && SC.Widget) {
-                    console.log('✓ SoundCloud Widget API available');
-                    this.scWidget = SC.Widget(this.soundcloudPlayer);
+            if (typeof SC !== 'undefined' && SC.Widget) {
+                console.log('✅ SoundCloud API available, creating widget...');
+                
+                try {
+                    this.scWidget = SC.Widget(player);
+                    this.soundcloudPlayer = player;
                     
                     this.scWidget.bind(SC.Widget.Events.READY, () => {
-                        console.log('✅ SoundCloud Widget API ready - initializing audio');
+                        console.log('🎵 SoundCloud widget ready - starting audio...');
+                        
+                        // Set volume and play
                         this.scWidget.setVolume(50);
-                        this.scWidget.seekTo(0);
                         this.scWidget.play();
-                        this.scWidget.getDuration((duration) => {
-                            console.log('🎵 Audio duration:', duration, 'ms');
-                        });
                         this.audioReady = true;
+                        
+                        console.log('✅ SoundCloud audio initialized successfully');
                     });
                 
                 this.scWidget.bind(SC.Widget.Events.PLAY, () => {
@@ -160,27 +181,30 @@ class CinematicWebsite {
                     console.log('Audio finished - maintaining volume setting');
                 });
                 
-                    this.scWidget.bind(SC.Widget.Events.ERROR, (error) => {
-                        console.error('❌ SoundCloud Widget API error:', error);
-                        console.log('🔄 Attempting to reinitialize SoundCloud...');
-                        setTimeout(() => {
-                            this.initializeSoundCloudIntegration();
-                        }, 2000);
+                    this.scWidget.bind(SC.Widget.Events.PLAY, () => {
+                        console.log('▶️ SoundCloud audio playing');
+                        this.scWidget.setVolume(50);
                     });
-                } else {
-                    console.warn('⚠ SoundCloud Widget API not available, retrying...');
-                    setTimeout(initializeWidget, 1000);
+                    
+                    this.scWidget.bind(SC.Widget.Events.ERROR, (error) => {
+                        console.error('❌ SoundCloud error:', error);
+                    });
+                    
+                } catch (error) {
+                    console.error('❌ Error creating SoundCloud widget:', error);
                 }
-            };
-            
-            initializeWidget();
-            this.applyVolumeReduction();
-        } else {
-            console.error('❌ SoundCloud player element not found');
-            setTimeout(() => {
-                this.initializeSoundCloudIntegration();
-            }, 2000);
-        }
+                
+            } else if (attempts < maxAttempts) {
+                console.log(`⏳ SoundCloud API not ready, attempt ${attempts}/${maxAttempts}...`);
+                setTimeout(initWidget, 500);
+            } else {
+                console.error('❌ SoundCloud API failed to load after multiple attempts');
+            }
+        };
+        
+        // Start initialization
+        initWidget();
+    }
     }
 
     applyVolumeReduction() {
@@ -613,116 +637,127 @@ class CinematicWebsite {
             }
         };
         
-        // Longer delay to ensure both audio and speech synthesis are ready
-        setTimeout(showMessage, 5000);
+        // Add manual start button for user interaction
+        const startButton = document.createElement('button');
+        startButton.textContent = '🎤 Start Experience';
+        startButton.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 40px;
+            font-size: 1.5rem;
+            background: linear-gradient(45deg, var(--gold), var(--crimson));
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            z-index: 10000;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        `;
+        
+        startButton.onclick = () => {
+            console.log('🎬 Manual start triggered by user');
+            startButton.remove();
+            
+            // Initialize audio
+            if (this.scWidget) {
+                this.scWidget.play();
+                this.scWidget.setVolume(50);
+            }
+            
+            // Start narration
+            setTimeout(showMessage, 1000);
+        };
+        
+        document.body.appendChild(startButton);
+        
+        // Auto-start after delay, remove button if successful
+        setTimeout(() => {
+            if (startButton.parentNode) {
+                console.log('🎬 Auto-starting experience...');
+                startButton.click();
+            }
+        }, 3000);
     }
     
     speakText(text, onComplete = null) {
-        console.log('🎤 Starting narrator voice:', text.substring(0, 50) + '...');
+        console.log('🎤 NARRATOR:', text.substring(0, 50) + '...');
         
-        if ('speechSynthesis' in window) {
-            console.log('✓ Speech synthesis available');
+        if (!('speechSynthesis' in window)) {
+            console.error('❌ Speech synthesis not supported');
+            if (onComplete) setTimeout(onComplete, 1000);
+            return;
+        }
+        
+        // Force cancel any existing speech
+        speechSynthesis.cancel();
+        
+        // Wait a moment then start
+        setTimeout(() => {
+            const voices = speechSynthesis.getVoices();
+            console.log('🔊 Using voices:', voices.length);
             
-            // Cancel any existing speech
-            speechSynthesis.cancel();
-            
-            const startSpeech = () => {
-                try {
-                    // Force get voices again
-                    const voices = speechSynthesis.getVoices();
-                    console.log('🔊 Voices available for narration:', voices.length);
+            try {
                     
-                    if (voices.length === 0) {
-                        console.warn('⚠ No voices available, waiting...');
-                        setTimeout(startSpeech, 1000);
-                        return;
-                    }
-                    
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.rate = 0.9;
-                    utterance.pitch = 1.1;
-                    utterance.volume = 1.0;
-                    
-                    const naturalVoice = voices.find(voice => 
-                        voice.lang.startsWith('en') && (
-                            voice.name.toLowerCase().includes('samantha') ||
-                            voice.name.toLowerCase().includes('karen') ||
-                            voice.name.toLowerCase().includes('susan') ||
-                            voice.name.toLowerCase().includes('victoria') ||
-                            voice.name.toLowerCase().includes('female') ||
-                            voice.name.toLowerCase().includes('allison') ||
-                            voice.name.toLowerCase().includes('alex')
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.8;  // Slower for better clarity
+                utterance.pitch = 1.0; // Natural pitch
+                utterance.volume = 1.0;
+                
+                // Select best available voice
+                if (voices.length > 0) {
+                    const preferredVoice = voices.find(v => 
+                        v.lang.includes('en') && (
+                            v.name.includes('Karen') || 
+                            v.name.includes('Samantha') ||
+                            v.name.includes('female')
                         )
-                    ) || voices.find(voice => voice.lang.startsWith('en'));
+                    ) || voices.find(v => v.lang.includes('en')) || voices[0];
                     
-                    if (naturalVoice) {
-                        utterance.voice = naturalVoice;
-                        console.log('🎯 Selected voice:', naturalVoice.name, naturalVoice.lang);
-                    } else {
-                        console.log('📢 Using default voice');
+                    if (preferredVoice) {
+                        utterance.voice = preferredVoice;
+                        console.log('🎯 Voice:', preferredVoice.name);
                     }
-                    
-                    this.isNarrating = true;
-                    this.currentUtterance = utterance;
-                    
-                    utterance.onstart = () => {
-                        console.log('✅ Narrator voice successfully started on live site!');
-                    };
-                    
-                    utterance.onend = () => {
-                        this.isNarrating = false;
-                        this.currentUtterance = null;
-                        console.log('✅ Narrator voice completed:', text.substring(0, 50) + '...');
-                        if (onComplete) {
-                            setTimeout(onComplete, 3000); // Longer pause after narration
-                        }
-                    };
-                    
-                    utterance.onerror = (event) => {
-                        this.isNarrating = false;
-                        this.currentUtterance = null;
-                        console.error('❌ Narrator voice error on live site:', event.error, event);
-                        if (onComplete) {
-                            setTimeout(onComplete, 1000);
-                        }
-                    };
-                    
-                    utterance.onpause = () => {
-                        console.log('⏸ Narrator voice paused');
-                    };
-                    
-                    utterance.onresume = () => {
-                        console.log('▶ Narrator voice resumed');
-                    };
-                    
-                    setTimeout(() => {
-                        console.log('🚀 Attempting to speak on live site...');
-                        speechSynthesis.speak(utterance);
-                        
-                        setTimeout(() => {
-                            if (!this.isNarrating) {
-                                console.warn('⚠ Speech may not have started, trying again...');
-                                speechSynthesis.cancel();
-                                speechSynthesis.speak(utterance);
-                            }
-                        }, 1000);
-                    }, 100);
-                    
-                } catch (error) {
-                    console.error('❌ Error creating speech utterance:', error);
+                }
+                
+                this.isNarrating = true;
+                this.currentUtterance = utterance;
+                
+                utterance.onstart = () => {
+                    console.log('✅ Narration started!');
+                };
+                
+                utterance.onend = () => {
+                    this.isNarrating = false;
+                    this.currentUtterance = null;
+                    console.log('✅ Narration complete');
+                    if (onComplete) {
+                        setTimeout(onComplete, 2000);
+                    }
+                };
+                
+                utterance.onerror = (event) => {
+                    this.isNarrating = false;
+                    this.currentUtterance = null;
+                    console.error('❌ Speech error:', event.error);
                     if (onComplete) {
                         setTimeout(onComplete, 1000);
                     }
+                };
+                
+                // Speak immediately
+                console.log('🚀 Speaking now...');
+                speechSynthesis.speak(utterance);
+                
+            } catch (error) {
+                console.error('❌ Error creating speech utterance:', error);
+                if (onComplete) {
+                    setTimeout(onComplete, 1000);
                 }
-            };
-            
-            startSpeech();
-        } else {
-            console.error('❌ Speech synthesis not supported on this browser');
-            if (onComplete) {
-                setTimeout(onComplete, 1000);
             }
-        }
+        }, 100); // Small delay to ensure voices are loaded
     }
 
     narrateSection(sectionIndex) {
@@ -831,6 +866,20 @@ class CinematicWebsite {
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🎬 Initializing Jacqueline Worsley Ministries Cinematic Experience...');
+    
+    // Try to start SoundCloud immediately
+    setTimeout(() => {
+        const player = document.getElementById('soundcloud-player');
+        if (player && typeof SC !== 'undefined' && SC.Widget) {
+            const widget = SC.Widget(player);
+            widget.bind(SC.Widget.Events.READY, () => {
+                widget.play();
+                widget.setVolume(50);
+                console.log('🎵 SoundCloud auto-started');
+            });
+        }
+    }, 500);
+    
     new CinematicWebsite();
 });
 
