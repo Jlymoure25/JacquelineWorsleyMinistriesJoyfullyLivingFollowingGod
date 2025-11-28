@@ -1,8 +1,8 @@
 # GitHub Pages Configuration
 title: "Jacqueline Worsley Ministries - Joyfully Living Following God"
 description: "Interactive biblical website featuring the Parable of the Talents with cinematic design and SoundCloud integration"
-url: "https://jlymoure25.github.io"
-baseurl: "/JacquelineWorsleyMinistriesJoyfullyLivingFollowingGod"
+url: "https://jlymoure25netlify.live"
+baseurl: ""
 
 # Build settings
 markdown: kramdown

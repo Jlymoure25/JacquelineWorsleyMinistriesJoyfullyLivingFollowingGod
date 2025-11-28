@@ -4,17 +4,17 @@
 
 ## 🌐 Live Website
 
-**[Visit Live Site](https://jlymoure25.github.io/JacquelineWorsleyMinistriesJoyfullyLivingFollowingGod)** | **[GitHub Repository](https://github.com/Jlymoure25/JacquelineWorsleyMinistriesJoyfullyLivingFollowingGod)**
+**[Visit Live Site](https://jlymoure25netlify.live)** | **[GitHub Repository](https://github.com/Jlymoure25/JacquelineWorsleyMinistriesJoyfullyLivingFollowingGod)**
 
-### 🚀 Alternative Deployment Options:
+### 🚀 Deployment Options:
+- **Primary Site**: [jlymoure25netlify.live](https://jlymoure25netlify.live) 🌟
 - **GitHub Pages**: [jlymoure25.github.io/JacquelineWorsleyMinistriesJoyfullyLivingFollowingGod](https://jlymoure25.github.io/JacquelineWorsleyMinistriesJoyfullyLivingFollowingGod)
 - **Netlify**: [Deploy from GitHub](https://app.netlify.com/start/deploy?repository=https://github.com/Jlymoure25/JacquelineWorsleyMinistriesJoyfullyLivingFollowingGod) 
-- **Vercel**: One-click deployment available
 
-### 🔧 Netlify Deployment:
-1. **Quick Deploy**: [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/Jlymoure25/JacquelineWorsleyMinistriesJoyfullyLivingFollowingGod)
-2. **Manual Setup**: See [NETLIFY_DEPLOY.md](NETLIFY_DEPLOY.md) for detailed instructions
-3. **Expected URL**: `https://jlymoure25.netlify.app` (after connecting repository)
+### 🔧 Custom Domain Setup:
+1. **Deploy to Netlify**: [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/Jlymoure25/JacquelineWorsleyMinistriesJoyfullyLivingFollowingGod)
+2. **Add Custom Domain**: `jlymoure25netlify.live` in Netlify dashboard
+3. **Configure DNS**: Point domain to Netlify's servers
 
 ## ✨ Features
 
@@ -262,7 +262,7 @@ Platform: SoundCloud
 Link: [soundcloud.com/smoothjazzallstars/we-belong-together-3](https://soundcloud.com/smoothjazzallstars/we-belong-together-3)
 
 ### 🚀 Deployment & Sharing:
-- **GitHub Pages**: [jlymoure25.github.io/JacquelineWorsleyMinistriesJoyfullyLivingFollowingGod](https://jlymoure25.github.io/JacquelineWorsleyMinistriesJoyfullyLivingFollowingGod)
+- **Live Site**: [jlymoure25netlify.live](https://jlymoure25netlify.live) 🌟
 - **GitHub Repository**: [github.com/Jlymoure25/JacquelineWorsleyMinistriesJoyfullyLivingFollowingGod](https://github.com/Jlymoure25/JacquelineWorsleyMinistriesJoyfullyLivingFollowingGod)
 - **Social Sharing**: Optimized for Facebook, Twitter, LinkedIn, Pinterest
 
