@@ -12,7 +12,7 @@ class CinematicWebsite {
         this.currentUtterance = null;
         this.sectionNarrated = new Set(); // Track which sections have been narrated
         this.introMusicPlayed = false;
-        this.isPaused = true; // Start paused for intro music
+        this.isPaused = false; // Auto-start narrator voice
         this.soundcloudPlayer = null;
         this.fadeInterval = null;
         this.audioReady = false;
@@ -68,10 +68,10 @@ class CinematicWebsite {
                 
                 // Comprehensive Widget API event binding for full control
                 this.scWidget.bind(SC.Widget.Events.READY, () => {
-                    console.log('SoundCloud Widget API ready - enforcing 17% volume with full API controls');
-                    this.scWidget.setVolume(17); // Widget API: 17% volume control
+                    console.log('SoundCloud Widget API ready - full API controls');
+                    this.scWidget.setVolume(50); // Widget API: 50% volume control
                     this.scWidget.seekTo(0); // Widget API: seekTo(0) command
-                    // Don't auto-play immediately - wait for user interaction
+                    this.scWidget.play(); // Auto-start audio
                     this.scWidget.getDuration((duration) => {
                         console.log('Audio duration:', duration, 'ms');
                     });
@@ -81,15 +81,15 @@ class CinematicWebsite {
                 
                 // Volume control on play events
                 this.scWidget.bind(SC.Widget.Events.PLAY, () => {
-                    console.log('Audio playing via Widget API - maintaining 17% volume');
-                    this.scWidget.setVolume(17);
+                    console.log('Audio playing via Widget API - maintaining optimal volume');
+                    this.scWidget.setVolume(50);
                 });
                 
                 // Progress tracking
                 this.scWidget.bind(SC.Widget.Events.PLAY_PROGRESS, (data) => {
-                    // Ensure volume stays at 17% during playback
-                    if (data.currentPosition % 5000 < 100) { // Check every 5 seconds
-                        this.scWidget.setVolume(17);
+                    // Maintain consistent volume during playback
+                    if (data.currentPosition % 10000 < 100) { // Check every 10 seconds
+                        this.scWidget.setVolume(50);
                     }
                 });
                 
@@ -115,14 +115,14 @@ class CinematicWebsite {
             
             // Pure Widget API volume control at 17% - no CSS methods
             if (this.scWidget) {
-                this.scWidget.setVolume(17);
+                this.scWidget.setVolume(50);
                 this.scWidget.getCurrentSound((sound) => {
                     if (sound) {
-                        console.log('Current sound loaded - API enforcing 17% volume');
-                        this.scWidget.setVolume(17);
+                        console.log('Current sound loaded - API volume control active');
+                        this.scWidget.setVolume(50);
                     }
                 });
-                console.log('Pure Widget API volume control set to 17%');
+                console.log('Pure Widget API volume control activated');
             }
         }
         
@@ -244,8 +244,8 @@ class CinematicWebsite {
         if (this.soundcloudPlayer) {
             console.log('Starting SoundCloud audio fade-out using pure API controls');
             
-            // Start from current 17% volume level - pure API fade
-            let currentVolume = 17;
+            // Start from current volume level - pure API fade
+            let currentVolume = 50;
             
             const duration = 30000; // 30 seconds fade-out
             const steps = 60;
@@ -314,11 +314,11 @@ class CinematicWebsite {
     startBackgroundMusic() {
         // SoundCloud player with user interaction support
         console.log('Starting background music with user interaction');
-        if (this.soundcloudPlayer && this.scWidget && this.audioReady) {
+        if (this.soundcloudPlayer && this.scWidget) {
             this.scWidget.play();
-            this.scWidget.setVolume(17);
+            this.scWidget.setVolume(50);
             this.fadeInAudio();
-            console.log('SoundCloud "We Belong Together (Instrumental)" starting with user interaction');
+            console.log('SoundCloud "We Belong Together (Instrumental)" starting automatically');
             this.isAudioPlaying = true;
             const audioBtn = document.querySelector('.audio-btn');
             if (audioBtn) audioBtn.textContent = '🔊';
@@ -603,24 +603,24 @@ class CinematicWebsite {
     }
 
     playIntroductionSequence() {
-        // Start with background music and immediately begin narration
+        // Start with background music and auto-start narrator voice
         const introSection = document.getElementById('intro');
         if (introSection) {
             // Start background music
             this.startBackgroundMusic();
-            console.log('Starting smooth jazz background music...');
+            console.log('Starting background music with auto-narrator...');
             
             // Initialize music (no message)
             this.showMusicIntro();
             
-            // Start narration immediately (no 5-second delay)
+            // Auto-start narration immediately
             setTimeout(() => {
                 this.isPaused = false; // Unpause narration
-                console.log('Starting narration with smooth jazz background');
+                console.log('Auto-starting narrator voice introduction');
                 
-                // Now start the welcome messages
+                // Automatically start the welcome messages
                 this.displayWelcomeMessage();
-            }, 1000); // Just 1 second delay
+            }, 2000); // 2 second delay for proper initialization
         }
     }
     
@@ -697,7 +697,7 @@ class CinematicWebsite {
                             // All intro messages complete, enable auto-advance
                             this.sectionNarrated.add('0-intro');
                         }
-                    }, 500);
+                    }, 1500); // Slower transition between messages
                 };
                 
                 this.speakText(messages[messageIndex], onMessageComplete);
@@ -708,11 +708,8 @@ class CinematicWebsite {
     }
     
     speakText(text, onComplete = null) {
-        // Don't speak if we're paused (waiting for intro music)
-        if (this.isPaused) {
-            console.log('Narration paused, waiting for intro music to complete');
-            return;
-        }
+        // Auto-start narration - no pause restrictions
+        console.log('Starting narration automatically');
         
         // Text-to-speech narration with natural joyful settings
         if ('speechSynthesis' in window) {
@@ -749,7 +746,7 @@ class CinematicWebsite {
                 this.currentUtterance = null;
                 console.log('Natural narration completed:', text.substring(0, 50) + '...');
                 if (onComplete) {
-                    setTimeout(onComplete, 1200); // Natural pause after speaking
+                    setTimeout(onComplete, 2000); // Longer pause for better timing
                 }
             };
             
@@ -1146,7 +1143,7 @@ function startAudioPlayback() {
     if (window.cinematicWebsite && window.cinematicWebsite.scWidget) {
         console.log('Starting audio playback via user interaction');
         window.cinematicWebsite.scWidget.play();
-        window.cinematicWebsite.scWidget.setVolume(17);
+        window.cinematicWebsite.scWidget.setVolume(50);
         window.cinematicWebsite.isAudioPlaying = true;
     }
 }
