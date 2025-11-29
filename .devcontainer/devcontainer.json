@@ -1,0 +1,29 @@
+{
+    "name": "Jacqueline Worsley Ministries",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "lts"
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ritwickdey.LiveServer",
+                "esbenp.prettier-vscode",
+                "dbaeumer.vscode-eslint",
+                "ecmel.vscode-html-css",
+                "formulahendry.auto-rename-tag"
+            ],
+            "settings": {
+                "liveServer.settings.port": 5500,
+                "liveServer.settings.donotShowInfoMsg": true,
+                "editor.formatOnSave": true,
+                "editor.defaultFormatter": "esbenp.prettier-vscode"
+            }
+        }
+    },
+    "forwardPorts": [5500],
+    "postCreateCommand": "echo 'Codespace ready! Right-click index.html and select \"Open with Live Server\" to preview the website.'",
+    "remoteUser": "vscode"
+}
