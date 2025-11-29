@@ -1,0 +1,23 @@
+{
+    "name": "Jacqueline Worsley Ministries",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ritwickdey.LiveServer",
+                "esbenp.prettier-vscode",
+                "ecmel.vscode-html-css",
+                "formulahendry.auto-rename-tag"
+            ],
+            "settings": {
+                "liveServer.settings.port": 5500,
+                "liveServer.settings.donotShowInfoMsg": true,
+                "editor.formatOnSave": true,
+                "editor.defaultFormatter": "esbenp.prettier-vscode"
+            }
+        }
+    },
+    "forwardPorts": [5500],
+    "postCreateCommand": "echo 'Codespace ready! Click \"Go Live\" in the status bar or right-click index.html and select \"Open with Live Server\" to preview the website.'",
+    "remoteUser": "vscode"
+}
